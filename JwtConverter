@@ -1,0 +1,15 @@
+@Component
+public class JWTConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+
+    @Override
+    public AbstractAuthenticationToken convert(Jwt tokenJwt) {
+
+        Map<String, Collection<String>> access = tokenJwt.getClaim("resource_access");
+        Map<String, Collection<String>> resources = (Map<String, Collection<String>>) access.get("tag-auth");
+        Collection<String> roles = resources.get("roles");
+        var grants = roles
+                .stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList();
+        return new JwtAuthenticationToken(tokenJwt, grants);
+    }
+}
